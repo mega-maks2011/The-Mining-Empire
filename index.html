@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Шахтерская Империя</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Общие стили */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50; /* Темно-синий фон по умолчанию */
+            color: #ecf0f1; /* Светлый текст */
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out; /* Плавное появление фона */
+        }
+        body.background-enabled {
+             background-image: url('assets/back.gif');
+        }
+        #game-container {
+            background-color: #34495e; /* Чуть светлее фон для контейнера */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 95%;
+            max-width: 960px;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+        h1 {
+            color: #f1c40f; /* Золотой заголовок */
+            margin-bottom: 20px;
+            font-size: 2.2em; /* Немного увеличил */
+        }
+        .info-panel {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            background-color: #34495e;
+            padding: 10px 0;
+            border-bottom: 1px solid #4e6a87;
+            border-radius: 10px 10px 0 0;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .info-item {
+            background-color: #283a4a;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin: 5px;
+            min-width: 90px;
+            flex-basis: auto;
+            box-sizing: border-box;
+            font-size: 0.9em;
+        }
+        .info-item span {
+            font-weight: bold;
+            color: #9b59b6;
+        }
+        .section-header {
+            color: #f1c40f;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-size: 1.8em; /* Немного увеличил */
+            border-bottom: 1px solid #4e6a87;
+            padding-bottom: 8px;
+            width: 90%;
+            align-self: center;
+        }
+        .action-buttons, .miner-buttons, .ore-buttons-content, .pickaxe-selection-content, .miner-type-buttons-content {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 95%;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #4e6a87;
+            flex-wrap: wrap;
+        }
+        /* Стили для кнопок меню */
+        .main-menu-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .main-menu-buttons button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px; /* Увеличил padding */
+            font-size: 1.2em; /* Увеличил шрифт */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 8px; /* Увеличил margin */
+            min-width: 200px; /* Увеличил минимальную ширину */
+        }
+        .main-menu-buttons button:hover {
+            background-color: #2980b9;
+        }
+        .main-menu-buttons button.active {
+            background-color: #e67e22;
+        }
+
+        /* Общие стили для всех игровых кнопок */
+        .action-buttons button, .miner-buttons button, .ore-buttons-content button, .research-buttons button, .prestige-buttons button, .control-buttons button, .pickaxe-selection-content button, .miner-type-buttons-content button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 25px; /* УВЕЛИЧЕННЫЙ PADDING для больших кнопок */
+            font-size: 1.1em; /* УВЕЛИЧЕННЫЙ FONT-SIZE */
+            border-radius: 5px;
+            cursor: pointer; /* Важно для визуального фидбека */
+            transition: background-color 0.3s ease;
+            margin: 8px; /* УВЕЛИЧЕННЫЙ MARGIN */
+            width: auto;
+            min-width: 180px; /* УВЕЛИЧЕННАЯ МИНИМАЛЬНАЯ ШИРИНА */
+            max-width: 280px; /* УВЕЛИЧЕННАЯ МАКСИМАЛЬНАЯ ШИРИНА */
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+            height: 80px; /* Задал фиксированную высоту для единообразия */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Для выравнивания текста и кд */
+        }
+        .control-buttons {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 95%;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #4e6a87;
+            flex-wrap: wrap;
+        }
+        .control-buttons button {
+             background-color: #3498db;
+             margin: 8px;
+             font-size: 1.0em;
+             padding: 12px 20px;
+             min-width: 120px;
+             height: auto; /* Для контрольных кнопок можно оставить авто */
+        }
+        .miner-buttons button { background-color: #f39c12; }
+        .ore-buttons-content button { background-color: #1abc9c; }
+        .research-buttons button { background-color: #9b59b6; }
+        .prestige-buttons button { background-color: #e74c3c; }
+        .pickaxe-selection-content button { background-color: #6c5ce7; }
+        .miner-type-buttons-content button { background-color: #e67e22; }
+
+        .action-buttons button:hover { background-color: #2ecc71; }
+        .control-buttons button:hover { background-color: #2980b9; }
+        .miner-buttons button:hover { background-color: #f1c40f; }
+        .ore-buttons-content button:hover { background-color: #16a085; }
+        .research-buttons button:hover { background-color: #8e44ad; }
+        .prestige-buttons button:hover { background-color: #c0392b; }
+        .pickaxe-selection-content button:hover { background-color: #8e7cff; }
+        .miner-type-buttons-content button:hover { background-color: #d35400; }
+
+        .action-buttons button:disabled, .control-buttons button:disabled,
+        .miner-buttons button:disabled, .ore-buttons-content button:disabled,
+        .research-buttons button:disabled, .prestige-buttons button:disabled,
+        .pickaxe-selection-content button:disabled, .miner-type-buttons-content button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        /* Стиль для текста КД */
+        .cooldown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4em; /* УВЕЛИЧЕННЫЙ РАЗМЕР ШРИФТА ДЛЯ ОВЕРЛЕЯ */
+            font-weight: bold;
+            z-index: 2;
+        }
+        .button-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            font-size: 1.0em; /* УВЕЛИЧЕННЫЙ РАЗМЕР ШРИФТА ДЛЯ ОСНОВНОГО ТЕКСТА КНОПКИ */
+        }
+        .button-text span {
+            display: block;
+            margin-top: 5px; /* Увеличил отступ */
+            font-size: 0.8em; /* Увеличил шрифт для подтекста */
+            opacity: 0.8;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            color: #e74c3c;
+            min-height: 20px;
+            font-weight: bold;
+            font-size: 1.0em; /* Увеличил шрифт */
+        }
+
+        /* Стили для разделов контента */
+        .content-section {
+            display: none;
+            padding: 15px;
+            border-top: 1px dashed #4e6a87;
+            margin-top: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .content-section.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #34495e;
+            margin: auto;
+            padding: 25px; /* Увеличил padding */
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 85%; /* Увеличил ширину модального окна */
+            max-width: 500px; /* Увеличил максимальную ширину модального окна */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            color: #ecf0f1;
+            font-size: 1.0em; /* Увеличил шрифт */
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px; /* Увеличил размер шрифта */
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #f1c40f;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .setting-item {
+            margin-bottom: 15px; /* Увеличил отступ */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .setting-item label {
+            flex: 1;
+            text-align: left;
+            margin-right: 10px;
+            min-width: 80px;
+            font-size: 1.0em; /* Увеличил шрифт */
+        }
+        .setting-item input[type="range"] {
+            flex: 2;
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px; /* Увеличил высоту слайдера */
+            background: #2ecc71;
+            outline: none;
+            border-radius: 4px;
+        }
+        .setting-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px; /* Увеличил размер ползунка */
+            height: 20px; /* Увеличил размер ползунка */
+            border-radius: 50%;
+            background: #f1c40f;
+            cursor: pointer;
+        }
+        .setting-item input[type="range"]::-moz-range-thumb {
+            width: 20px; /* Увеличил размер ползунка */
+            height: 20px; /* Увеличил размер ползунка */
+            border-radius: 50%;
+            background: #f1c40f;
+            cursor: pointer;
+        }
+        .setting-item button {
+            width: auto;
+            max-width: none;
+            margin: 0;
+            padding: 10px 18px; /* Увеличил padding */
+            font-size: 0.9em; /* Увеличил шрифт */
+        }
+
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.0em;
+            }
+            .info-panel {
+                padding: 8px 0;
+            }
+            .info-item {
+                font-size: 0.85em;
+                min-width: 80px;
+                padding: 6px 10px;
+                margin: 3px;
+            }
+            .section-header {
+                font-size: 1.6em;
+                padding-bottom: 6px;
+                margin-top: 20px;
+                margin-bottom: 10px;
+            }
+            .main-menu-buttons button {
+                font-size: 1.1em;
+                padding: 12px 25px;
+                min-width: 180px;
+            }
+            .action-buttons, .miner-buttons, .ore-buttons-content, .pickaxe-selection-content, .miner-type-buttons-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            .action-buttons button, .miner-buttons button, .ore-buttons-content button, .research-buttons button, .prestige-buttons button, .control-buttons button, .pickaxe-selection-content button, .miner-type-buttons-content button {
+                width: 90%; /* Ширина кнопок на мобильном */
+                min-width: auto;
+                max-width: 350px; /* Увеличил максимальную ширину */
+                margin: 8px 0; /* Увеличил отступ */
+                padding: 15px 20px; /* Увеличил padding */
+                font-size: 1.05em; /* Увеличил шрифт */
+                height: 90px; /* Увеличил высоту */
+            }
+            .control-buttons button {
+                width: 80%;
+                min-width: auto;
+                padding: 10px 15px;
+                font-size: 1.0em;
+            }
+            .cooldown-overlay {
+                font-size: 1.2em;
+            }
+            .button-text {
+                font-size: 1.0em;
+            }
+            .button-text span {
+                font-size: 0.85em;
+            }
+            .status-message {
+                font-size: 0.95em;
+                margin-top: 10px;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+                font-size: 0.95em;
+            }
+            .close-button {
+                font-size: 24px;
+                top: 8px;
+                right: 12px;
+            }
+            .setting-item label {
+                font-size: 0.95em;
+                margin-right: 8px;
+            }
+            .setting-item input[type="range"] {
+                height: 6px;
+            }
+            .setting-item input[type="range"]::-webkit-slider-thumb {
+                width: 18px;
+                height: 18px;
+            }
+            .setting-item input[type="range"]::-moz-range-thumb {
+                width: 18px;
+                height: 18px;
+            }
+            .setting-item button {
+                font-size: 0.85em;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Шахтерская Империя</h1>
+
+        <div class="info-panel">
+            <div class="info-item">Деньги: <span id="money">0</span></div>
+            <div class="info-item">Камень: <span id="stone">0</span></div>
+            <div class="info-item">Уголь: <span id="coal">0</span></div>
+            <div class="info-item">Железо: <span id="iron">0</span></div>
+            <div class="info-item">Медь: <span id="copper">0</span></div>
+            <div class="info-item">Золото: <span id="gold">0</span></div>
+            <div class="info-item">Алмазы: <span id="diamond">0</span></div>
+            <div class="info-item">Кварц: <span id="quartz">0</span></div>
+            <div class="info-item">Обломки: <span id="ancient_debris">0</span></div>
+            <div class="info-item">Радужная: <span id="rainbow_ore">0</span></div>
+            <div class="info-item">Кирка: <span id="currentPickaxeName">Деревянная</span> (Ур. <span id="pickaxeLevel">1</span>)</div>
+            <div class="info-item">Добыча за клик: <span id="minePower">1</span></div>
+        </div>
+
+        <div class="action-buttons">
+            <button id="upgradePickaxeButton">Улучшить Кирку (Стоимость: <span id="upgradeCost">10</span>)</button>
+            <button id="sellResourcesButton">Продать Ресурсы</button>
+        </div>
+
+        <div class="main-menu-buttons">
+            <button id="showMiningMenu">Добыча Руды</button>
+            <button id="showPickaxeModalButton">Кирки</button>
+            <button id="showMinerModalButton">Шахтеры</button>
+        </div>
+
+        <div id="miningMenu" class="content-section active">
+            <h2 class="section-header">Добыча Руды</h2>
+            <div class="ore-buttons-content">
+                </div>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+
+        <div class="control-buttons">
+            <button id="saveGameButton">Сохранить Игру</button>
+            <button id="loadGameButton">Загрузить Игру</button>
+            <button id="resetGameButton">Начать Заново</button>
+            <button id="settingsButton">Настройки</button>
+        </div>
+    </div>
+
+    <audio id="backgroundMusic"></audio>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeSettingsModal">&times;</span>
+            <h2>Настройки</h2>
+
+            <div class="setting-item">
+                <label for="musicVolume">Музыка:</label>
+                <input type="range" id="musicVolume" min="0" max="100" value="50">
+            </div>
+
+            <div class="setting-item">
+                <label for="sfxVolume">Звуковые эффекты:</label>
+                <input type="range" id="sfxVolume" min="0" max="100" value="70">
+            </div>
+
+            <div class="setting-item">
+                <label>Фоновая музыка:</label>
+                <button id="musicToggleButton">Выключить</button>
+            </div>
+
+            <div class="setting-item">
+                <label>Фоновый рисунок:</label>
+                <button id="backgroundToggleButton">Выключить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pickaxeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closePickaxeModal">&times;</span>
+            <h2 class="section-header">Кирки</h2>
+            <div class="pickaxe-selection-content">
+                </div>
+        </div>
+    </div>
+
+    <div id="minerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeMinerModal">&times;</span>
+            <h2 class="section-header">Наем Шахтеров</h2>
+            <div class="info-item">Активные шахтеры: <span id="activeMiners">0</span></div>
+            <div class="info-item">Авто-добыча/сек: <span id="totalMinerProduction">0</span></div>
+            <div class="miner-type-buttons-content">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальный объект для всех игровых функций и переменных
+        window.game = {};
+
+        // Глобальный объект для всех отладочных функций и доступа к внутренним переменным
+        window.debug = {};
+
+        // --- Игровые переменные ---
+        // Эти переменные теперь будут доступны через window.game.variableName
+        game.money = 0;
+        game.stone = 0;
+        game.coal = 0;
+        game.iron = 0;
+        game.copper = 0;
+        game.gold = 0;
+        game.diamond = 0;
+        game.quartz = 0;
+        game.ancient_debris = 0;
+        game.rainbow_ore = 0; // Новая руда
+
+        // Кирки
+        game.pickaxeTypes = {
+            wooden: {
+                name: 'Деревянная Кирка',
+                level: 1,
+                minePower: 1,
+                upgradeCost: 10,
+                upgradeCostMultiplier: 1.5,
+                unlockMoney: 0,
+                minableOres: ['stone', 'coal']
+            },
+            stone: {
+                name: 'Каменная Кирка',
+                level: 1,
+                minePower: 2,
+                upgradeCost: 50,
+                upgradeCostMultiplier: 1.6,
+                unlockMoney: 500,
+                minableOres: ['stone', 'coal', 'iron', 'copper']
+            },
+            iron: {
+                name: 'Железная Кирка',
+                level: 1,
+                minePower: 4,
+                upgradeCost: 200,
+                upgradeCostMultiplier: 1.7,
+                unlockMoney: 2000,
+                minableOres: ['stone', 'coal', 'iron', 'copper', 'gold', 'diamond']
+            },
+            diamond: {
+                name: 'Алмазная Кирка',
+                level: 1,
+                minePower: 8,
+                upgradeCost: 800,
+                upgradeCostMultiplier: 1.8,
+                unlockMoney: 8000,
+                minableOres: ['stone', 'coal', 'iron', 'copper', 'gold', 'diamond', 'quartz', 'ancient_debris']
+            },
+            netherite: { // Новая незеритовая кирка
+                name: 'Незеритовая Кирка',
+                level: 1,
+                minePower: 20, // Значительное увеличение силы
+                upgradeCost: 5000, // Высокая стоимость
+                upgradeCostMultiplier: 1.9,
+                unlockMoney: 25000, // Высокая стоимость разблокировки
+                minableOres: ['stone', 'coal', 'iron', 'copper', 'gold', 'diamond', 'quartz', 'ancient_debris', 'rainbow_ore']
+            }
+        };
+        game.currentPickaxe = 'wooden';
+        game.unlockedPickaxes = ['wooden'];
+
+        // Шахтеры
+        game.minerTypes = {
+            simple: {
+                name: 'Обычный Шахтер',
+                cost: 100,
+                production: 1, // Производит 1 ед. самой дорогой руды в секунду
+                duration: 5 * 60 * 1000, // 5 минут
+                unlockMoney: 0
+            },
+            advanced: {
+                name: 'Опытный Шахтер',
+                cost: 500,
+                production: 5, // Производит 5 ед. самой дорогой руды в секунду
+                duration: 10 * 60 * 1000, // 10 минут
+                unlockMoney: 1000
+            },
+            expert: {
+                name: 'Эксперт Шахтер',
+                cost: 2000,
+                production: 20, // Производит 20 ед. самой дорогой руды в секунду
+                duration: 15 * 60 * 1000, // 15 минут
+                unlockMoney: 5000
+            }
+        };
+        game.minerContracts = []; // Теперь храним контракты с временем истечения
+
+        // Цены продажи руды
+        game.oreSellPrices = {
+            stone: 1,
+            coal: 2,
+            copper: 5,
+            iron: 10,
+            gold: 20,
+            diamond: 50,
+            quartz: 100,
+            ancient_debris: 500,
+            rainbow_ore: 5000 // Новая руда - очень дорогая!
+        };
+
+        // Все доступные руды (для итерации и создания кнопок)
+        game.allOres = ['stone', 'coal', 'iron', 'copper', 'gold', 'diamond', 'quartz', 'ancient_debris', 'rainbow_ore'];
+
+
+        // Кулдауны для добычи (в миллисекундах)
+        game.BASE_MINE_COOLDOWN = 2000; // Базовый кулдаун (2 секунды)
+        game.MIN_MINE_COOLDOWN = 100; // Минимальный кулдаун (0.1 секунды)
+
+        // Последнее время добычи для каждой руды
+        game.oreCooldowns = {};
+        game.allOres.forEach(ore => game.oreCooldowns[ore] = 0); // Инициализация кулдаунов
+
+        // Настройки звука и фона
+        game.musicVolume = 0.5;
+        game.sfxVolume = 0.7;
+        game.isBackgroundEnabled = true;
+        game.isMusicPlaying = false;
+
+        // Элементы DOM (также доступны через game.elementName)
+        game.moneyDisplay = document.getElementById('money');
+        game.stoneDisplay = document.getElementById('stone');
+        game.coalDisplay = document.getElementById('coal');
+        game.ironDisplay = document.getElementById('iron');
+        game.copperDisplay = document.getElementById('copper');
+        game.goldDisplay = document.getElementById('gold');
+        game.diamondDisplay = document.getElementById('diamond');
+        game.quartzDisplay = document.getElementById('quartz');
+        game.ancient_debrisDisplay = document.getElementById('ancient_debris');
+        game.rainbow_oreDisplay = document.getElementById('rainbow_ore'); // Добавил дисплей для радужной руды
+
+        game.currentPickaxeNameDisplay = document.getElementById('currentPickaxeName');
+        game.pickaxeLevelDisplay = document.getElementById('pickaxeLevel');
+        game.minePowerDisplay = document.getElementById('minePower');
+        game.upgradeCostDisplay = document.getElementById('upgradeCost');
+        game.statusMessage = document.getElementById('statusMessage');
+
+        game.upgradePickaxeButton = document.getElementById('upgradePickaxeButton');
+        game.sellResourcesButton = document.getElementById('sellResourcesButton');
+
+        game.showMiningMenuButton = document.getElementById('showMiningMenu');
+        game.showPickaxeModalButton = document.getElementById('showPickaxeModalButton');
+        game.showMinerModalButton = document.getElementById('showMinerModalButton');
+
+        game.miningMenuContent = document.getElementById('miningMenu');
+        game.settingsModal = document.getElementById('settingsModal');
+        game.pickaxeModal = document.getElementById('pickaxeModal');
+        game.minerModal = document.getElementById('minerModal');
+
+        game.closeSettingsModal = document.getElementById('closeSettingsModal');
+        game.closePickaxeModal = document.getElementById('closePickaxeModal');
+        game.closeMinerModal = document.getElementById('closeMinerModal');
+
+        game.oreButtonsContainer = document.querySelector('.ore-buttons-content');
+        game.pickaxeSelectionContainer = game.pickaxeModal.querySelector('.pickaxe-selection-content');
+        game.minerTypeButtonsContainer = game.minerModal.querySelector('.miner-type-buttons-content');
+
+        game.activeMinersDisplay = game.minerModal.querySelector('#activeMiners');
+        game.totalMinerProductionDisplay = game.minerModal.querySelector('#totalMinerProduction');
+
+        game.saveGameButton = document.getElementById('saveGameButton');
+        game.loadGameButton = document.getElementById('loadGameButton');
+        game.resetGameButton = document.getElementById('resetGameButton');
+        game.settingsButton = document.getElementById('settingsButton');
+
+        game.backgroundMusic = document.getElementById('backgroundMusic');
+        game.musicToggleButton = document.getElementById('musicToggleButton');
+
+        game.musicVolumeSlider = document.getElementById('musicVolume');
+        game.sfxVolumeSlider = document.getElementById('sfxVolume');
+        game.backgroundToggleButton = document.getElementById('backgroundToggleButton');
+
+        game.musicTracks = [
+            'assets/sounds/music1.mp3', 'assets/sounds/music2.mp3', 'assets/sounds/music3.mp3',
+            'assets/sounds/music4.mp3', 'assets/sounds/music5.mp3', 'assets/sounds/music6.mp3',
+            'assets/sounds/music7.mp3', 'assets/sounds/music8.mp3'
+        ];
+        game.sfxSoundPaths = {
+            mine: 'assets/sounds/sfx_mine.mp3', upgrade: 'assets/sounds/sfx_upgrade.mp3',
+            sell: 'assets/sounds/sfx_sell.mp3', error: 'assets/sounds/sfx_error.mp3',
+            hire: 'assets/sounds/sfx_hire.mp3', click: 'assets/sounds/sfx_click.mp3'
+        };
+
+        game.currentTrackIndex = -1;
+        game.playedMusicTracks = [];
+
+        game.clickSoundPoolSize = 5;
+        game.clickSoundPool = [];
+        for (let i = 0; i < game.clickSoundPoolSize; i++) {
+            const audio = new Audio(game.sfxSoundPaths.click);
+            audio.volume = game.sfxVolume;
+            game.clickSoundPool.push(audio);
+        }
+        game.currentClickSoundIndex = 0;
+
+        game.specificSfxAudio = new Audio();
+
+
+        // --- Вспомогательные функции (доступны через game.) ---
+
+        game.getPickaxeCurrentProps = function(pickaxeId) {
+            return game.pickaxeTypes[pickaxeId];
+        }
+
+        game.calculateMineCooldown = function(oreName) {
+            let baseCooldown = game.BASE_MINE_COOLDOWN;
+            switch(oreName) {
+                case 'coal': baseCooldown = 2500; break;
+                case 'copper': baseCooldown = 3000; break;
+                case 'iron': baseCooldown = 3500; break;
+                case 'gold': baseCooldown = 4000; break;
+                case 'diamond': baseCooldown = 5000; break;
+                case 'quartz': baseCooldown = 6000; break;
+                case 'ancient_debris': baseCooldown = 8000; break;
+                case 'rainbow_ore': baseCooldown = 10000; break; // Для новой руды
+            }
+
+            const reductionPerLevel = 10;
+            let currentPickaxeLevel = game.getPickaxeCurrentProps(game.currentPickaxe).level;
+            let calculatedCooldown = baseCooldown - (currentPickaxeLevel * reductionPerLevel);
+            return Math.max(calculatedCooldown, game.MIN_MINE_COOLDOWN);
+        }
+
+        game.getActiveMinersCount = function() {
+            const now = Date.now();
+            game.minerContracts = game.minerContracts.filter(contract => contract.expiresAt > now);
+            return game.minerContracts.length;
+        }
+
+        game.getTotalMinerProduction = function() {
+            let totalProduction = 0;
+            const now = Date.now();
+            game.minerContracts.forEach(contract => {
+                if (contract.expiresAt > now) {
+                    totalProduction += game.minerTypes[contract.type].production;
+                }
+            });
+            return totalProduction;
+        }
+
+        game.getOreNameLocalized = function(oreId) {
+            switch (oreId) {
+                case 'stone': return 'Камень';
+                case 'coal': return 'Уголь';
+                case 'iron': return 'Железо';
+                case 'copper': return 'Медь';
+                case 'gold': return 'Золото';
+                case 'diamond': return 'Алмаз';
+                case 'quartz': return 'Кварц';
+                case 'ancient_debris': return 'Обломки';
+                case 'rainbow_ore': return 'Радужная Руда'; // Для новой руды
+                default: return oreId;
+            }
+        }
+
+        game.getPickaxeRequiredForOre = function(oreId) {
+            if (['stone', 'coal'].includes(oreId)) return 'Деревянная';
+            if (['iron', 'copper'].includes(oreId)) return 'Каменная';
+            if (['gold', 'diamond'].includes(oreId)) return 'Железная';
+            if (['quartz', 'ancient_debris'].includes(oreId)) return 'Алмазная';
+            if (['rainbow_ore'].includes(oreId)) return 'Незеритовая'; // Для новой руды
+            return 'Неизвестная';
+        }
+
+        /**
+         * Определяет самую дорогую руду, которую текущая кирка может добыть.
+         * @returns {string|null} ID самой дорогой руды или null, если нет доступных.
+         */
+        game.getMostValuableMinableOre = function() {
+            const currentPickaxeData = game.getPickaxeCurrentProps(game.currentPickaxe);
+            let mostValuableOre = null;
+            let maxPrice = -1;
+
+            // Сортируем руды по убыванию цены
+            const sortedOres = game.allOres.sort((a, b) => game.oreSellPrices[b] - game.oreSellPrices[a]);
+
+            for (const oreId of sortedOres) {
+                if (currentPickaxeData.minableOres.includes(oreId)) {
+                    // Проверяем, что цена руды определена
+                    if (game.oreSellPrices[oreId] !== undefined) {
+                        if (game.oreSellPrices[oreId] > maxPrice) {
+                            maxPrice = game.oreSellPrices[oreId];
+                            mostValuableOre = oreId;
+                        }
+                    }
+                }
+            }
+            return mostValuableOre;
+        };
+
+
+        // --- Обновление UI ---
+        game.updateUI = function() {
+            game.moneyDisplay.textContent = Math.floor(game.money);
+            game.stoneDisplay.textContent = Math.floor(game.stone);
+            game.coalDisplay.textContent = Math.floor(game.coal);
+            game.ironDisplay.textContent = Math.floor(game.iron);
+            game.copperDisplay.textContent = Math.floor(game.copper);
+            game.goldDisplay.textContent = Math.floor(game.gold);
+            game.diamondDisplay.textContent = Math.floor(game.diamond);
+            game.quartzDisplay.textContent = Math.floor(game.quartz);
+            game.ancient_debrisDisplay.textContent = Math.floor(game.ancient_debris);
+            game.rainbow_oreDisplay.textContent = Math.floor(game.rainbow_ore); // Обновляем дисплей для радужной руды
+
+            const currentPickaxeData = game.getPickaxeCurrentProps(game.currentPickaxe);
+            game.currentPickaxeNameDisplay.textContent = currentPickaxeData.name;
+            game.pickaxeLevelDisplay.textContent = currentPickaxeData.level;
+            game.minePowerDisplay.textContent = currentPickaxeData.minePower;
+            game.upgradeCostDisplay.textContent = Math.floor(currentPickaxeData.upgradeCost);
+
+            game.upgradePickaxeButton.disabled = game.money < currentPickaxeData.upgradeCost;
+
+            let canSellAnyResource = false;
+            for (const oreId in game.oreSellPrices) {
+                if (game[oreId] && game[oreId] >= 1) { // Доступ к ресурсам через game[oreId]
+                    canSellAnyResource = true;
+                    break;
+                }
+            }
+            game.sellResourcesButton.disabled = !canSellAnyResource;
+
+            game.musicVolumeSlider.value = game.musicVolume * 100;
+            game.sfxVolumeSlider.value = game.sfxVolume * 100;
+            game.backgroundMusic.volume = game.musicVolume;
+            game.specificSfxAudio.volume = game.sfxVolume;
+            game.clickSoundPool.forEach(audio => audio.volume = game.sfxVolume);
+
+            game.musicToggleButton.textContent = game.isMusicPlaying ? 'Выключить' : 'Включить';
+            game.backgroundToggleButton.textContent = game.isBackgroundEnabled ? 'Выключить' : 'Включить';
+            document.body.classList.toggle('background-enabled', game.isBackgroundEnabled);
+
+            game.updateOreButtonState();
+            game.updatePickaxeSelectionButtonState();
+            game.updateMinerTypeButtonState();
+
+            game.activeMinersDisplay.textContent = game.getActiveMinersCount();
+            game.totalMinerProductionDisplay.textContent = game.getTotalMinerProduction();
+        }
+
+        game.showMessage = function(message, isError = false) {
+            game.statusMessage.textContent = message;
+            game.statusMessage.style.color = isError ? '#e74c3c' : '#2ecc71';
+            setTimeout(() => {
+                game.statusMessage.textContent = '';
+            }, 3000);
+        }
+
+        // --- Функции переключения меню/модальных окон ---
+        game.showSection = function(sectionId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            game.settingsModal.style.display = 'none';
+            game.pickaxeModal.style.display = 'none';
+            game.minerModal.style.display = 'none';
+
+            const menuButtons = document.querySelectorAll('.main-menu-buttons button');
+            menuButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            if (sectionId === 'miningMenu') game.showMiningMenuButton.classList.add('active');
+
+            game.updateUI();
+        }
+
+        game.showModal = function(modalElement) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            game.settingsModal.style.display = 'none';
+            game.pickaxeModal.style.display = 'none';
+            game.minerModal.style.display = 'none';
+
+            modalElement.style.display = 'flex';
+
+            const menuButtons = document.querySelectorAll('.main-menu-buttons button');
+            menuButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            if (modalElement === game.pickaxeModal) game.showPickaxeModalButton.classList.add('active');
+            if (modalElement === game.minerModal) game.showMinerModalButton.classList.add('active');
+
+            game.updateUI();
+            if (modalElement === game.pickaxeModal) {
+                game.updatePickaxeSelectionButtonState();
+            }
+            if (modalElement === game.minerModal) {
+                game.updateMinerTypeButtonState();
+            }
+        }
+
+        game.hideModal = function(modalElement) {
+            modalElement.style.display = 'none';
+            game.showSection('miningMenu');
+            game.updateUI();
+        }
+
+
+        // --- Функции для ОДНОКРАТНОГО создания кнопок (вызываются только при DOMContentLoaded) ---
+        game.createInitialOreButtons = function() {
+            game.oreButtonsContainer.innerHTML = '';
+            game.allOres.forEach(ore => { // Теперь используем game.allOres
+                const button = document.createElement('button');
+                button.id = `mine-${ore}-button`;
+                button.innerHTML = `
+                    <div class="button-text">
+                        ${game.getOreNameLocalized(ore)}
+                        <span>(Сила: 1, КД: 2.0с)</span>
+                    </div>
+                    <div class="cooldown-overlay" id="${ore}CooldownOverlay" style="display: none;"></div>
+                `;
+                button.addEventListener('click', () => game.mineOre(ore));
+                game.oreButtonsContainer.appendChild(button);
+            });
+        }
+
+        game.createInitialPickaxeSelectionButtons = function() {
+            game.pickaxeSelectionContainer.innerHTML = '';
+            for (const pickaxeId in game.pickaxeTypes) {
+                const button = document.createElement('button');
+                button.id = `pickaxe-${pickaxeId}-button`;
+                button.innerHTML = `<div class="button-text"><span></span></div>`;
+                button.addEventListener('click', () => {
+                    const isUnlocked = game.unlockedPickaxes.includes(pickaxeId);
+                    if (!isUnlocked) {
+                        game.buyPickaxe(pickaxeId);
+                    } else {
+                        game.equipPickaxe(pickaxeId);
+                    }
+                    game.updateUI();
+                });
+                game.pickaxeSelectionContainer.appendChild(button);
+            }
+        }
+
+        game.createInitialMinerTypeButtons = function() {
+            game.minerTypeButtonsContainer.innerHTML = '';
+            for (const minerId in game.minerTypes) {
+                const button = document.createElement('button');
+                button.id = `hire-${minerId}-button`;
+                button.innerHTML = `<div class="button-text"><span></span></div>`;
+                button.addEventListener('click', () => game.hireMiner(minerId));
+                game.minerTypeButtonsContainer.appendChild(button);
+            }
+        }
+
+        // --- Обновление СОСТОЯНИЯ кнопок (не их пересоздание) ---
+        game.updateOreButtonState = function() {
+            const currentPickaxeData = game.getPickaxeCurrentProps(game.currentPickaxe);
+            const now = Date.now();
+            
+            game.allOres.forEach(ore => { // Теперь используем game.allOres
+                const button = document.getElementById(`mine-${ore}-button`);
+                if (!button) return;
+
+                const requiredCooldown = game.calculateMineCooldown(ore);
+                const cooldownRemaining = Math.max(0, requiredCooldown - (now - game.oreCooldowns[ore]));
+                const isDisabledByCooldown = cooldownRemaining > 0;
+                const canMineWithCurrentPickaxe = currentPickaxeData.minableOres.includes(ore);
+
+                const overlay = button.querySelector(`#${ore}CooldownOverlay`);
+                const buttonTextDiv = button.querySelector('.button-text');
+                const subTextSpan = buttonTextDiv.querySelector('span');
+
+                buttonTextDiv.childNodes[0].textContent = `Копать ${game.getOreNameLocalized(ore)}`;
+
+                if (!canMineWithCurrentPickaxe) {
+                    subTextSpan.textContent = `Требуется ${game.getPickaxeRequiredForOre(ore)} кирка`;
+                } else {
+                    subTextSpan.textContent = `(Сила: ${currentPickaxeData.minePower}, КД: ${(requiredCooldown / 1000).toFixed(1)}с)`;
+                }
+
+                button.disabled = isDisabledByCooldown || !canMineWithCurrentPickaxe;
+                button.classList.toggle('not-mineable', !canMineWithCurrentPickaxe);
+
+                if (isDisabledByCooldown) {
+                    overlay.style.display = 'flex';
+                    overlay.textContent = (cooldownRemaining / 1000).toFixed(1) + 'с';
+                    if (!button.dataset.cooldownTimerId) {
+                         game.startCooldownTimer(ore, button, requiredCooldown, game.oreCooldowns[ore]);
+                    }
+                } else {
+                    overlay.style.display = 'none';
+                    if (button.dataset.cooldownTimerId) {
+                        clearInterval(parseInt(button.dataset.cooldownTimerId));
+                        delete button.dataset.cooldownTimerId;
+                    }
+                }
+            });
+        }
+
+        game.startCooldownTimer = function(oreId, buttonElement, totalCooldown, lastMineTime) {
+            if (buttonElement.dataset.cooldownTimerId) {
+                clearInterval(parseInt(buttonElement.dataset.cooldownTimerId));
+            }
+
+            const overlay = buttonElement.querySelector(`#${oreId}CooldownOverlay`);
+            const updateInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = Math.max(0, totalCooldown - (now - lastMineTime));
+
+                if (timeLeft <= 0) {
+                    overlay.style.display = 'none';
+                    buttonElement.disabled = false;
+                    clearInterval(updateInterval);
+                    delete buttonElement.dataset.cooldownTimerId;
+                } else {
+                    overlay.style.display = 'flex';
+                    overlay.textContent = (timeLeft / 1000).toFixed(1) + 'с';
+                    buttonElement.disabled = true;
+                }
+            }, 100);
+            buttonElement.dataset.cooldownTimerId = updateInterval.toString();
+        }
+
+        game.updatePickaxeSelectionButtonState = function() {
+            for (const pickaxeId in game.pickaxeTypes) {
+                const pickaxeData = game.pickaxeTypes[pickaxeId];
+                const button = document.getElementById(`pickaxe-${pickaxeId}-button`);
+                if (!button) continue;
+
+                const isUnlocked = game.unlockedPickaxes.includes(pickaxeId);
+                const isEquipped = game.currentPickaxe === pickaxeId;
+
+                const buttonTextDiv = button.querySelector('.button-text');
+
+                let newButtonText = pickaxeData.name;
+                let newSubText = '';
+                let isDisabled = false;
+
+                if (isEquipped) {
+                    newButtonText += ' (ЭКИПИРОВАНО)';
+                    isDisabled = true;
+                    newSubText = `Ур. ${pickaxeData.level}, Сила: ${pickaxeData.minePower}`;
+                } else if (isUnlocked) {
+                    newButtonText += ' (Экипировать)';
+                    newSubText = `Ур. ${pickaxeData.level}, Сила: ${pickaxeData.minePower}`;
+                } else {
+                    newButtonText += ' (Купить)';
+                    newSubText = `Стоимость: ${Math.floor(pickaxeData.unlockMoney)} денег`;
+                    isDisabled = game.money < pickaxeData.unlockMoney;
+                }
+                buttonTextDiv.innerHTML = `${newButtonText}<span>${newSubText}</span>`;
+                button.disabled = isDisabled;
+            }
+        }
+
+        game.updateMinerTypeButtonState = function() {
+            for (const minerId in game.minerTypes) {
+                const minerData = game.minerTypes[minerId];
+                const button = document.getElementById(`hire-${minerId}-button`);
+                if (!button) continue;
+
+                const buttonTextDiv = button.querySelector('.button-text');
+                const subTextSpan = buttonTextDiv.querySelector('span'); // На этом месте была ошибка
+
+                let newButtonText = minerData.name;
+                let newSubText = `Стоимость: ${minerData.cost} денег (${(minerData.duration / 1000 / 60).toFixed(0)} мин, дает ${minerData.production} руды/сек)`;
+                let isDisabled = game.money < minerData.cost;
+
+                buttonTextDiv.innerHTML = `${newButtonText}<span>${newSubText}</span>`;
+                button.disabled = isDisabled;
+            }
+        }
+
+
+        // --- Игровые механики (доступны через game.) ---
+
+        game.mineOre = function(oreId) {
+            const now = Date.now();
+            const requiredCooldown = game.calculateMineCooldown(oreId);
+
+            if (now - game.oreCooldowns[oreId] < requiredCooldown) {
+                game.showMessage(`Подождите, кулдаун на ${game.getOreNameLocalized(oreId)} еще не прошел!`, true);
+                game.playSFX('error');
+                return;
+            }
+
+            const currentPickaxeData = game.getPickaxeCurrentProps(game.currentPickaxe);
+            if (!currentPickaxeData.minableOres.includes(oreId)) {
+                game.showMessage(`Ваша ${currentPickaxeData.name} не может добывать ${game.getOreNameLocalized(oreId)}!`, true);
+                game.playSFX('error');
+                return;
+            }
+
+            game[oreId] += currentPickaxeData.minePower; // Доступ к ресурсу через game[oreId]
+            game.oreCooldowns[oreId] = now;
+
+            game.playSFX('mine');
+            game.showMessage(`${currentPickaxeData.name} добыла ${currentPickaxeData.minePower} ${game.getOreNameLocalized(oreId)}.`);
+            game.updateUI();
+        }
+
+
+        game.upgradePickaxe = function() {
+            const pickaxe = game.pickaxeTypes[game.currentPickaxe];
+            if (game.money >= pickaxe.upgradeCost) {
+                game.money -= pickaxe.upgradeCost;
+                pickaxe.level++;
+                pickaxe.minePower = Math.ceil(pickaxe.minePower * 1.5);
+                pickaxe.upgradeCost = Math.floor(pickaxe.upgradeCost * pickaxe.upgradeCostMultiplier);
+                game.showMessage(`Кирка улучшена до Уровня ${pickaxe.level}! Сила добычи: ${pickaxe.minePower}.`);
+                game.playSFX('upgrade');
+            } else {
+                game.showMessage('Недостаточно денег для улучшения кирки!', true);
+                game.playSFX('error');
+            }
+            game.updateUI();
+        }
+
+        game.buyPickaxe = function(pickaxeId) {
+            const pickaxeData = game.pickaxeTypes[pickaxeId];
+            if (game.money >= pickaxeData.unlockMoney) {
+                game.money -= pickaxeData.unlockMoney;
+                game.unlockedPickaxes.push(pickaxeId);
+                game.showMessage(`Вы купили ${pickaxeData.name}! Теперь можете ее экипировать.`);
+                game.playSFX('upgrade');
+            } else {
+                game.showMessage(`Недостаточно денег для покупки ${pickaxeData.name}!`, true);
+                game.playSFX('error');
+            }
+            game.updateUI();
+        }
+
+        game.equipPickaxe = function(pickaxeId) {
+            if (game.unlockedPickaxes.includes(pickaxeId)) {
+                game.currentPickaxe = pickaxeId;
+                game.showMessage(`Вы экипировали ${game.pickaxeTypes[pickaxeId].name}.`);
+                game.playSFX('click');
+            } else {
+                game.showMessage('Эта кирка еще не разблокирована!', true);
+                game.playSFX('error');
+            }
+            game.updateUI();
+        }
+
+        game.sellResources = function() {
+            let totalSold = 0;
+            let totalMoneyEarned = 0;
+
+            for (const oreId in game.oreSellPrices) {
+                const amount = game[oreId]; // Доступ к ресурсу через game[oreId]
+                if (amount > 0) {
+                    const price = game.oreSellPrices[oreId];
+                    const earned = amount * price;
+                    game.money += earned;
+                    totalMoneyEarned += earned;
+                    totalSold += amount;
+                    game[oreId] = 0; // Сбрасываем количество руды
+                }
+            }
+
+            if (totalSold > 0) {
+                game.showMessage(`Продано ${totalSold} ресурсов, заработано ${Math.floor(totalMoneyEarned)} денег.`);
+                game.playSFX('sell');
+            } else {
+                game.showMessage('У вас нет ресурсов для продажи.', true);
+                game.playSFX('error');
+            }
+            game.updateUI();
+        }
+
+        game.hireMiner = function(minerId) {
+            const minerData = game.minerTypes[minerId];
+            if (game.money >= minerData.cost) {
+                game.money -= minerData.cost;
+                game.minerContracts.push({
+                    type: minerId,
+                    hiredAt: Date.now(),
+                    expiresAt: Date.now() + minerData.duration // Используем duration из типа шахтера
+                });
+                game.showMessage(`Вы наняли ${minerData.name} на ${(minerData.duration / 1000 / 60).toFixed(0)} минут!`);
+                game.playSFX('hire');
+            } else {
+                game.showMessage(`Недостаточно денег для найма ${minerData.name}!`, true);
+                game.playSFX('error');
+            }
+            game.updateUI();
+        }
+
+        // --- Сохранение/Загрузка/Сброс игры (доступны через game.) ---
+        game.saveGame = function() {
+            const gameState = {
+                money: game.money,
+                stone: game.stone,
+                coal: game.coal,
+                iron: game.iron,
+                copper: game.copper,
+                gold: game.gold,
+                diamond: game.diamond,
+                quartz: game.quartz,
+                ancient_debris: game.ancient_debris,
+                rainbow_ore: game.rainbow_ore, // Сохраняем новую руду
+                pickaxeTypes: JSON.parse(JSON.stringify(game.pickaxeTypes)),
+                currentPickaxe: game.currentPickaxe,
+                unlockedPickaxes: game.unlockedPickaxes,
+                minerContracts: game.minerContracts,
+                oreCooldowns: game.oreCooldowns,
+                musicVolume: game.musicVolume,
+                sfxVolume: game.sfxVolume,
+                isBackgroundEnabled: game.isBackgroundEnabled,
+                isMusicPlaying: game.isMusicPlaying
+            };
+            localStorage.setItem('minerEmpireSave', JSON.stringify(gameState));
+            game.showMessage('Игра сохранена!');
+            game.playSFX('click');
+        }
+
+        game.loadGame = function() {
+            const savedState = localStorage.getItem('minerEmpireSave');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                game.money = gameState.money || 0;
+                game.stone = gameState.stone || 0;
+                game.coal = gameState.coal || 0;
+                game.iron = gameState.iron || 0;
+                game.copper = gameState.copper || 0;
+                game.gold = gameState.gold || 0;
+                game.diamond = gameState.diamond || 0;
+                game.quartz = gameState.quartz || 0;
+                game.ancient_debris = gameState.ancient_debris || 0;
+                game.rainbow_ore = gameState.rainbow_ore || 0; // Загружаем новую руду
+
+                if (gameState.pickaxeTypes) {
+                    for (const id in game.pickaxeTypes) {
+                        if (gameState.pickaxeTypes[id]) {
+                            // Копируем только те свойства, которые могут изменяться
+                            game.pickaxeTypes[id].level = gameState.pickaxeTypes[id].level;
+                            game.pickaxeTypes[id].minePower = gameState.pickaxeTypes[id].minePower;
+                            game.pickaxeTypes[id].upgradeCost = gameState.pickaxeTypes[id].upgradeCost;
+                        }
+                    }
+                }
+
+                game.currentPickaxe = gameState.currentPickaxe || 'wooden';
+                game.unlockedPickaxes = gameState.unlockedPickaxes || ['wooden'];
+                game.minerContracts = gameState.minerContracts || [];
+                game.oreCooldowns = gameState.oreCooldowns || {};
+                game.allOres.forEach(ore => { // Убедимся, что все кулдауны инициализированы
+                    if (game.oreCooldowns[ore] === undefined) {
+                        game.oreCooldowns[ore] = 0;
+                    }
+                });
+
+                game.musicVolume = gameState.musicVolume !== undefined ? gameState.musicVolume : 0.5;
+                game.sfxVolume = gameState.sfxVolume !== undefined ? gameState.sfxVolume : 0.7;
+                game.isBackgroundEnabled = gameState.isBackgroundEnabled !== undefined ? gameState.isBackgroundEnabled : true;
+                game.isMusicPlaying = gameState.isMusicPlaying !== undefined ? gameState.isMusicPlaying : false;
+
+                if (game.isMusicPlaying) {
+                    game.playRandomMusic();
+                } else {
+                    game.backgroundMusic.pause();
+                    game.backgroundMusic.currentTime = 0;
+                }
+                game.showMessage('Игра загружена!');
+            } else {
+                game.showMessage('Нет сохраненных игр.', true);
+            }
+            game.updateUI();
+            game.playSFX('click');
+        }
+
+        game.resetGame = function() {
+            if (confirm('Вы уверены, что хотите начать игру заново? Весь прогресс будет утерян!')) {
+                localStorage.removeItem('minerEmpireSave');
+                location.reload();
+            }
+        }
+
+        // --- Функции для звука (доступны через game.) ---
+        game.playRandomMusic = function() {
+            if (!game.isMusicPlaying) {
+                game.backgroundMusic.pause();
+                return;
+            }
+
+            if (game.playedMusicTracks.length === game.musicTracks.length) {
+                game.playedMusicTracks = [];
+            }
+
+            let nextTrackIndex;
+            do {
+                nextTrackIndex = Math.floor(Math.random() * game.musicTracks.length);
+            } while (game.playedMusicTracks.includes(nextTrackIndex));
+
+            game.currentTrackIndex = nextTrackIndex;
+            game.playedMusicTracks.push(game.currentTrackIndex);
+
+            game.backgroundMusic.src = game.musicTracks[game.currentTrackIndex];
+            game.backgroundMusic.volume = game.musicVolume;
+            game.backgroundMusic.play().catch(e => console.log("Music playback failed:", e));
+        }
+
+        game.playSFX = function(sfxType) {
+            if (game.sfxVolume <= 0) return;
+
+            if (!game.sfxSoundPaths[sfxType]) {
+                console.warn(`SFX path not found for type: ${sfxType}`);
+                return;
+            }
+
+            if (sfxType === 'click') {
+                const audio = game.clickSoundPool[game.currentClickSoundIndex];
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("SFX playback failed (click):", e));
+                game.currentClickSoundIndex = (game.currentClickSoundIndex + 1) % game.clickSoundPoolSize;
+            } else {
+                game.specificSfxAudio.src = game.sfxSoundPaths[sfxType];
+                game.specificSfxAudio.volume = game.sfxVolume;
+                game.specificSfxAudio.currentTime = 0;
+                game.specificSfxAudio.play().catch(e => console.log(`SFX playback failed (${sfxType}):`, e));
+            }
+        }
+
+        // --- Инициализация и обработчики событий ---
+        document.addEventListener('DOMContentLoaded', () => {
+            game.loadGame();
+            game.updateUI();
+
+            // Создаем кнопки только один раз при загрузке
+            game.createInitialOreButtons();
+            game.createInitialPickaxeSelectionButtons();
+            game.createInitialMinerTypeButtons();
+
+            game.showMiningMenuButton.addEventListener('click', () => game.showSection('miningMenu'));
+            game.showPickaxeModalButton.addEventListener('click', () => game.showModal(game.pickaxeModal));
+            game.showMinerModalButton.addEventListener('click', () => game.showModal(game.minerModal));
+
+            game.upgradePickaxeButton.addEventListener('click', game.upgradePickaxe);
+            game.sellResourcesButton.addEventListener('click', game.sellResources);
+
+            game.saveGameButton.addEventListener('click', game.saveGame);
+            game.loadGameButton.addEventListener('click', game.loadGame);
+            game.resetGameButton.addEventListener('click', game.resetGame);
+            game.settingsButton.addEventListener('click', () => game.showModal(game.settingsModal));
+
+            game.closeSettingsModal.addEventListener('click', () => game.hideModal(game.settingsModal));
+            game.closePickaxeModal.addEventListener('click', () => game.hideModal(game.pickaxeModal));
+            game.closeMinerModal.addEventListener('click', () => game.hideModal(game.minerModal));
+
+            game.musicVolumeSlider.addEventListener('input', (event) => {
+                game.musicVolume = parseFloat(event.target.value) / 100;
+                game.backgroundMusic.volume = game.musicVolume;
+                game.updateUI();
+            });
+            game.sfxVolumeSlider.addEventListener('input', (event) => {
+                game.sfxVolume = parseFloat(event.target.value) / 100;
+                game.specificSfxAudio.volume = game.sfxVolume;
+                game.clickSoundPool.forEach(audio => audio.volume = game.sfxVolume);
+                game.updateUI();
+            });
+
+            game.musicToggleButton.addEventListener('click', () => {
+                game.isMusicPlaying = !game.isMusicPlaying;
+                if (game.isMusicPlaying) {
+                    game.playRandomMusic();
+                } else {
+                    game.backgroundMusic.pause();
+                    game.backgroundMusic.currentTime = 0;
+                }
+                game.updateUI();
+            });
+
+            game.backgroundToggleButton.addEventListener('click', () => {
+                game.isBackgroundEnabled = !game.isBackgroundEnabled;
+                document.body.classList.toggle('background-enabled', game.isBackgroundEnabled);
+                game.updateUI();
+            });
+
+            game.backgroundMusic.addEventListener('ended', game.playRandomMusic);
+
+            let hasInteracted = false;
+            document.body.addEventListener('click', () => {
+                if (!hasInteracted && game.isMusicPlaying) {
+                    game.playRandomMusic();
+                    hasInteracted = true;
+                }
+            }, { once: true });
+
+
+            // Игровой цикл для автоматической добычи шахтеров и обновления кулдаунов
+            setInterval(() => {
+                const now = Date.now();
+                const mostValuableOre = game.getMostValuableMinableOre();
+                if (mostValuableOre) {
+                    game.minerContracts.forEach(contract => {
+                        if (contract.expiresAt > now) {
+                            // Шахтеры добывают самую дорогую руду, которую может добыть текущая кирка
+                            game[mostValuableOre] += game.minerTypes[contract.type].production / 10; // Делим на 10, так как цикл 100 мс
+                        }
+                    });
+                }
+                game.updateUI();
+            }, 100); // Обновляется 10 раз в секунду
+            
+            // Отдельный интервал для проверки окончания контрактов шахтеров и обновления UI
+            setInterval(() => {
+                const initialMinerCount = game.minerContracts.length;
+                game.minerContracts = game.minerContracts.filter(contract => contract.expiresAt > Date.now());
+                if (game.minerContracts.length !== initialMinerCount) {
+                    game.showMessage('Срок действия некоторых контрактов шахтеров истек.');
+                    game.updateUI(); // Обновить UI, чтобы отобразить изменения количества шахтеров
+                }
+            }, 1000); // Проверяем каждую секунду
+
+            game.showSection('miningMenu');
+        });
+
+
+        // --- КОНСОЛЬНЫЕ КОМАНДЫ ДЛЯ ОТЛАДКИ ---
+        // Игровые команды (game.property или game.function())
+        debug.help = "Используйте debug.logState() для просмотра состояния игры. debug.setMoney(X), debug.addOre(type, amount), debug.unlockPickaxe(id), debug.setPickaxeLevel(level), debug.addMinerContract(minerType, durationMinutes)";
+
+        debug.logState = function() {
+            console.log("=== СОСТОЯНИЕ ИГРЫ ===");
+            console.log("Деньги:", game.money);
+            console.log("Камень:", game.stone);
+            console.log("Уголь:", game.coal);
+            console.log("Железо:", game.iron);
+            console.log("Медь:", game.copper);
+            console.log("Золото:", game.gold);
+            console.log("Алмазы:", game.diamond);
+            console.log("Кварц:", game.quartz);
+            console.log("Обломки:", game.ancient_debris);
+            console.log("Радужная Руда:", game.rainbow_ore); // Логируем новую руду
+            console.log("Текущая кирка:", game.currentPickaxe, game.pickaxeTypes[game.currentPickaxe]);
+            console.log("Разблокированные кирки:", game.unlockedPickaxes);
+            console.log("Контракты шахтеров:", game.minerContracts);
+            console.log("Последние кулдауны руды:", game.oreCooldowns);
+            console.log("Настройки звука/фона:", {
+                musicVolume: game.musicVolume,
+                sfxVolume: game.sfxVolume,
+                isBackgroundEnabled: game.isBackgroundEnabled,
+                isMusicPlaying: game.isMusicPlaying
+            });
+            console.log("======================");
+        };
+
+        debug.setMoney = function(amount) {
+            if (typeof amount === 'number' && amount >= 0) {
+                game.money = amount;
+                game.updateUI();
+                console.log(`Деньги установлены на: ${game.money}`);
+            } else {
+                console.error("Неверное количество денег. Используйте положительное число.");
+            }
+        };
+
+        debug.addMoney = function(amount) {
+            if (typeof amount === 'number' && amount > 0) {
+                game.money += amount;
+                game.updateUI();
+                console.log(`Добавлено ${amount} денег. Текущие деньги: ${game.money}`);
+            } else {
+                console.error("Неверное количество денег для добавления. Используйте положительное число.");
+            }
+        };
+
+        debug.addOre = function(oreType, amount) {
+            if (game[oreType] !== undefined && typeof amount === 'number' && amount > 0) {
+                game[oreType] += amount;
+                game.updateUI();
+                console.log(`Добавлено ${amount} ${game.getOreNameLocalized(oreType)}. Текущее количество: ${game[oreType]}`);
+            } else {
+                console.error(`Неверный тип руды или количество. Типы: ${game.allOres.join(', ')}`);
+            }
+        };
+
+        debug.unlockPickaxe = function(pickaxeId) {
+            if (game.pickaxeTypes[pickaxeId] && !game.unlockedPickaxes.includes(pickaxeId)) {
+                game.unlockedPickaxes.push(pickaxeId);
+                game.updateUI();
+                console.log(`${game.pickaxeTypes[pickaxeId].name} разблокирована.`);
+            } else if (!game.pickaxeTypes[pickaxeId]) {
+                console.error(`Кирка с ID "${pickaxeId}" не существует.`);
+            } else {
+                console.log(`${game.pickaxeTypes[pickaxeId].name} уже разблокирована.`);
+            }
+        };
+
+        debug.setPickaxeLevel = function(pickaxeId, level) {
+            if (game.pickaxeTypes[pickaxeId] && typeof level === 'number' && level >= 1) {
+                const pickaxe = game.pickaxeTypes[pickaxeId];
+                // Сброс до начальных значений для корректного пересчета
+                const originalPickaxeData = JSON.parse(JSON.stringify(game.pickaxeTypes))[pickaxeId]; // Получаем исходные данные
+                pickaxe.level = level;
+                // minePower и upgradeCost пересчитываются от базовых значений
+                pickaxe.minePower = originalPickaxeData.minePower;
+                pickaxe.upgradeCost = originalPickaxeData.upgradeCost;
+
+                for (let i = 1; i < level; i++) {
+                    pickaxe.minePower = Math.ceil(pickaxe.minePower * 1.5);
+                    pickaxe.upgradeCost = Math.floor(pickaxe.upgradeCost * pickaxe.upgradeCostMultiplier);
+                }
+
+                game.updateUI();
+                console.log(`Кирка ${pickaxe.name} установлена на уровень ${level}. Сила: ${pickaxe.minePower}.`);
+            } else {
+                console.error("Неверный ID кирки или уровень. Уровень должен быть числом >= 1.");
+            }
+        };
+
+        debug.resetCooldowns = function() {
+            for (const ore in game.oreCooldowns) {
+                game.oreCooldowns[ore] = 0;
+            }
+            game.updateUI();
+            console.log("Все кулдауны сброшены.");
+        };
+
+        debug.addMinerContract = function(minerType, durationMinutes = 5) {
+            if (game.minerTypes[minerType] && typeof durationMinutes === 'number' && durationMinutes > 0) {
+                game.minerContracts.push({
+                    type: minerType,
+                    hiredAt: Date.now(),
+                    expiresAt: Date.now() + (durationMinutes * 60 * 1000)
+                });
+                game.updateUI();
+                console.log(`Добавлен ${minerType} шахтер на ${durationMinutes} минут.`);
+            } else {
+                console.error("Неверный тип шахтера или продолжительность.");
+            }
+        };
+    </script>
+</body>
+</html>
